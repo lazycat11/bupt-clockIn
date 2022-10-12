@@ -49,10 +49,12 @@ class ClockIn:
             "execution": params[1],
             "_eventId": params[2]
         }
-        self.__session.post(url=self.__login_url, headers=self.__headers, data=data, allow_redirects=False)
+        res = self.__session.post(url=self.__login_url, headers=self.__headers, data=data, allow_redirects=False)
+        return len(res.cookies) > 0
 
     def __get_html(self):
-        self.__get_cookie()
+        if not self.__get_cookie():
+            logging.error("failed to get cookie")
         res = self.__session.get(url=self.__old_info_url, headers=self.__headers)
         if res.status_code == 200:
             return res.text
@@ -69,8 +71,12 @@ class ClockIn:
         pattern = re.compile(r"oldInfo: {.*?},$", re.MULTILINE | re.DOTALL)
         try:
             s = json.loads(re.findall(pattern, str(script))[0][9:-1])
+            with open("info.json", 'r+') as f:
+                json.dump(s, f)
         except:
-            return ""
+            logging.error("not found old info, attempt to use local info")
+            with open("info.json", 'r+') as f:
+                s = json.load(f)
         s["created"] = int(time.time())
         s["date"] = time.strftime("%Y%m%d")
         return s
