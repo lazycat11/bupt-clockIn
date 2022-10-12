@@ -71,11 +71,11 @@ class ClockIn:
         pattern = re.compile(r"oldInfo: {.*?},$", re.MULTILINE | re.DOTALL)
         try:
             s = json.loads(re.findall(pattern, str(script))[0][9:-1])
-            with open("info.json", 'r+') as f:
+            with open("clockIn/info.json", 'r+') as f:
                 json.dump(s, f)
         except:
             logging.error("not found old info, attempt to use local info")
-            with open("info.json", 'r+') as f:
+            with open("clockIn/info.json", 'r+') as f:
                 s = json.load(f)
         s["created"] = int(time.time())
         s["date"] = time.strftime("%Y%m%d")
